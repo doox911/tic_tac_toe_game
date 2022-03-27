@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+
+.xo-square {
+  width: 30px;
+  height: 30px;
+  font-family: 'Dancing Script', cursive;
+  user-select: none;
+  background: #222;
+}
+
+.xo-square-x--text {
+  color: #0284c7;
+  text-shadow: 1px 1px 1px rgb(248 250 252);
+}
+
+.xo-square-0--text {
+  color: #e11d48;
+  text-shadow: 1px 1px 1px rgb(248 250 252);
+}
+
+.xo-square-winner--text {
+  color: #166534;
+  text-shadow: 1px 1px 1px rgb(248 250 252) !important;
+}
