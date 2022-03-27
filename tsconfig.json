@@ -2,8 +2,12 @@
   "compilerOptions": {
     "outDir": "./built",
     "allowJs": true,
-    "target": "es5",
-    "jsx": "react"
+    "target": "ESNext",
+    "jsx": "react",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
   },
   "include": ["./src/*"]
 }

@@ -1,176 +1,109 @@
-import * as React from 'react';
-import Board from './Board';
+/**
+ * React
+ */
+import * as React from 'react'
 
-export type CellValue = 'X' | 'O' | null
+/**
+ * Common
+ */
+import { findWinner, generateSquares, createGameHistory } from '../common/index'
 
-export type SquareIndexes = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+/**
+ * Components
+ */
+import Board from './Board'
+import Welcome from './Welcome'
 
-type Props = {}
+/**
+ * Store
+ */
+import { useAppSelector, useAppDispatch } from '../store/hooks'
+import {
+  getIsGameOver,
+  setGameOver,
+  setWinnerSquares,
+  getGameStatus,
+  addStep,
+  getStep,
+} from '../store/game'
 
-type State = {
-  history: {
-    squares: CellValue[]
-    position: null | [number, number]
-  }[]
-  x_is_next: boolean
-  step: number
-}
+/**
+ * Types
+ */
+import type { RenderSquare } from './Square'
 
-export default class Game extends React.Component<Props, State> {
-  constructor(props) {
-    super(props);
+const squares: RenderSquare[] = generateSquares()
 
-    this.state = {
-      history: [{
-        squares: Array(9).fill(null),
-        position: null
-      }],
-      x_is_next: true,
-      step: 0,
-    };
-  }
+const win_sound = new Audio('static/audio/mixkit-instant-win-2021.wav');
 
-  handleClick(i: SquareIndexes) {
-    const history = this.state.history.slice(0, this.state.step + 1);
+const click_sound = new Audio('static/audio/mixkit-plastic-bubble-click-1124.wav');
 
-    const current = history[history.length - 1]
+function Game() {
 
-    const squares = current.squares.slice();
+  /**
+   * Состояние компонента Game
+   */
+  const [next, setNext] = React.useState<boolean>(true)
 
-    if (calculateWinner(squares) || squares[i]) {
-      return
-    }
+  const [history, setHistory] = React.useState<GameHistory>(createGameHistory())
 
-    squares[i] = this.state.x_is_next ? 'X' : 'O';
+  /**
+   * Redux 
+   */
+  // const step = useAppSelector(getStep)
 
-    this.setState({
-      history: history.concat([{
-        squares,
-        position: getPosition(i)
-      }]),
-      step: history.length,
-      x_is_next: !this.state.x_is_next,
-    })
-  }
+  const status = useAppSelector(getGameStatus)
 
-  jumpTo(step: number) {
-    this.setState({
-      step,
-      x_is_next: (step % 2) === 0,
-    });
-  }
+  const is_game_over = useAppSelector(getIsGameOver)
 
-  render() {
-    const history = this.state.history;
+  const dispatch = useAppDispatch();
 
-    const current = history[this.state.step]
+  function onClickHandler(square: RenderSquare) {
+    if (!is_game_over && !square.freeze) {
+      click_sound.play();
 
-    const winner = calculateWinner(current.squares)
+      dispatch(addStep())
 
-    const moves = history.map((step, move) => {
-      const position = step.position === null
-        ? ''
-        : ' [' + step.position + ']'
+      square.freeze = true
+      square.value = next ? 1 : 0
 
-      const desc = move
-        ? `Ход #${move} ${position}`
-        : 'Началу игры';
+      history[square.position.y][square.position.x] = square
 
-      return (
-        <li key={move}>
-          <div 
-            className="btn"
-            onClick={() => this.jumpTo(move)}
-          >
-            {desc}
-          </div>
-        </li>
-      );
-    })
+      setHistory([...history])
 
-    return (
-      <>
-        <div className="status user-select-none">
-          {getStatus(current.squares, this.state.x_is_next, winner?.winner)}
-        </div>
-        <div className="game">
-          <div className="game-board">
-            <Board
-              wins_square={winner ? winner.winner_squares : []}
-              squares={current.squares}
-              onClick={(i: SquareIndexes) => this.handleClick(i)}
-            />
-          </div>
-          <div className="game-info">
-            <ol>{moves}</ol>
-          </div>
-        </div>
-      </>
-    );
-  }
-}
+      const winner = findWinner(history, square)
 
-function getStatus(
-  squares: CellValue[],
-  x_is_next: boolean,
-  winner: CellValue
-) {
-  let status = winner
-    ? `Выиграли: ${winner}`
-    : `Следующий ход: ${x_is_next ? 'X' : 'O'}`
+      if (winner.win) {
+        win_sound.play()
+        dispatch(setWinnerSquares(winner.squares))
+      }
 
-  if (!winner && squares.filter(e => !!e).length === 0) {
-    status = 'Начать игру! Первый ход - X'
-  }
+      dispatch(setGameOver(winner.win))
 
-  if (!winner && squares.filter(e => !!e).length === squares.length) {
-    status = 'Ничья!'
-  }
-
-  return status
-}
-
-function calculateWinner(squares: CellValue[]) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-
-    if (
-      squares[a] &&
-      squares[a] === squares[b] &&
-      squares[a] === squares[c]
-    ) {
-      return {
-        winner: squares[a],
-        winner_squares: lines[i]
-      };
+      setNext(!next)
     }
   }
 
-  return null;
+  return (
+    <div className="game container max-w-2xl mx-auto">
+      {status === 1 && <Welcome />}
+      {status === 2 &&
+        <Board
+          squares={squares}
+          onClick={onClickHandler}
+        />
+      }
+    </div>
+  );
 }
 
-export function getPosition(index: SquareIndexes): [number, number] {
-  const p: { [key in SquareIndexes]: [number, number] } = {
-    0: [1, 1],
-    1: [1, 2],
-    2: [1, 3],
-    3: [2, 1],
-    4: [2, 2],
-    5: [2, 3],
-    6: [3, 1],
-    7: [3, 2],
-    8: [3, 3],
-  }
+export type GameHistory = (RenderSquare | null)[]
 
-  return p[index]
-}
+/**
+ * 1 - Игра не началась
+ * 2 - Идёт игра
+ * 3 - Игра окончена
+ */
+export type GameStatus = 1 | 2 | 3
+
+export default Game

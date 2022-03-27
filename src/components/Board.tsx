@@ -1,70 +1,62 @@
 import * as React from 'react'
-import { chunk } from "lodash"
 
 /**
  * Components
  */
- import Square from './Square'
- import SquareDescription from './SquareDescription'
+import Square from './Square'
+
+/**
+ * Store
+ */
+ import { useAppSelector } from '../store/hooks';
+ import { getIsGameOver,  getWinnerSquares} from '../store/game'
 
 /**
  * Types
  */
-import type { CellValue, SquareIndexes } from './Game'
+import type { RenderSquare } from './Square'
 
 type Props = {
-  squares: CellValue[]
-  wins_square: number[]
-  onClick: (i: number) => void
+  squares: RenderSquare[]
+  onClick: (square: RenderSquare) => void
 }
 
-export default class Board extends React.Component<Props> {
+function Board(props: Props) {
 
-  renderSquare(i: SquareIndexes) {
-    const classes = this.props.wins_square.find(e => e === i) !== undefined  
-      ? 'winner-square' 
-      : ''
+  /**
+   * Redux 
+   */
+  const is_game_over = useAppSelector(getIsGameOver)
+  const winner_squares = useAppSelector(getWinnerSquares)
 
-    return (
-      <Square
-        classes={classes}
-        key={`s-${i}`}
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
-      />
-    );
+  const winners = {}
+  
+  if (is_game_over) {
+    winner_squares.forEach(s => {
+      winners[s.id - 1] = true
+    })
   }
 
-  renderBoardRow(squares: CellValue[], chunck: number, index: number) {
-    return (
-      <div
-        key={`br-${index}`}
-        className="board-row"
-      >
-        <SquareDescription value={index + 1}/>
-        {squares.map((s, j) => this.renderSquare(chunck * index + j as SquareIndexes))}
-      </div>
-    )
-  }
-
-  render() {
-    const size = 3
-    const squares: CellValue[][] = chunk(this.props.squares, size);
-
-    return (
-      <div className="board">
-             <div
-        key={`br-`}
-        className="board-row"
-      >
-        <SquareDescription value=""/>
-        <SquareDescription value="1"/>
-        <SquareDescription value="2"/>
-        <SquareDescription value="3"/>
-      </div>
-        
-        {squares.map((sqrs, i) => this.renderBoardRow(sqrs, size, i))}
-      </div>
-    );
-  }
+  return (
+    <div className="board flex flex-wrap border border-slate-400">
+      {
+        props.squares.map((square, index) => (
+          <Square
+            key={square.id}
+            square={square}
+            is_winner={
+              is_game_over
+                ? Object.keys(winners).length
+                  ? winners[index]
+                  : false
+                : false
+            }
+            onClick={() => props.onClick(square)}
+          />
+        ))
+      }
+    </div>
+  );
 }
+
+export default Board
