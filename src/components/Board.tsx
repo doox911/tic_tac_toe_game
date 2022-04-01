@@ -1,3 +1,6 @@
+/**
+ * React
+ */
 import * as React from 'react'
 
 /**
@@ -6,31 +9,31 @@ import * as React from 'react'
 import Square from './Square'
 
 /**
+ * Constants
+ */
+ import { GameStatus } from '../constants/game'
+
+/**
  * Store
  */
- import { useAppSelector } from '../store/hooks';
- import { getIsGameOver,  getWinnerSquares} from '../store/game'
+import { useAppSelector } from '../store/hooks';
+import { getGameStatus, getWinnerSquares } from '../store/game'
 
 /**
  * Types
  */
 import type { RenderSquare } from './Square'
 
-type Props = {
-  squares: RenderSquare[]
-  onClick: (square: RenderSquare) => void
-}
-
 function Board(props: Props) {
 
   /**
    * Redux 
    */
-  const is_game_over = useAppSelector(getIsGameOver)
+  const is_game_over = useAppSelector(getGameStatus) === GameStatus.GAME_OVER
   const winner_squares = useAppSelector(getWinnerSquares)
 
   const winners = {}
-  
+
   if (is_game_over) {
     winner_squares.forEach(s => {
       winners[s.id - 1] = true
@@ -38,7 +41,7 @@ function Board(props: Props) {
   }
 
   return (
-    <div className="board flex flex-wrap border border-slate-400">
+    <div className="board mx-auto flex flex-wrap border border-slate-400">
       {
         props.squares.map((square, index) => (
           <Square
@@ -57,6 +60,11 @@ function Board(props: Props) {
       }
     </div>
   );
+}
+
+type Props = {
+  squares: RenderSquare[],
+  onClick: (square: RenderSquare) => void
 }
 
 export default Board

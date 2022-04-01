@@ -1,18 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 /**
+ * Constants
+ */
+ import type { GameStatus } from '../../constants/game'
+ 
+/**
  * Types
  */
 import type { RootState } from '../../store'
 import type { RenderSquare } from '../../components/Square'
-import type { GameStatus } from '../../components/Game'
+
 
 export type GameState = {
-
-  /**
-   * Флаг завершения игры
-   */
-  is_game_over: boolean
 
   /**
    * Победившая последовательность
@@ -25,7 +25,6 @@ export type GameState = {
 }
 
 const initialState: GameState = {
-  is_game_over: false,
   winner_squares: [],
   status: 1,
   step: 0,
@@ -35,12 +34,6 @@ export const gameSlice = createSlice({
   name: 'game',
   initialState,
   reducers: {
-    gameOver: state => {
-      state.is_game_over = true
-    },
-    setGameOver: (state, action: PayloadAction<boolean>) => {
-      state.is_game_over = action.payload
-    },
     setWinnerSquares: (state, action: PayloadAction<RenderSquare[]>) => {
       state.winner_squares = action.payload
     },
@@ -49,7 +42,10 @@ export const gameSlice = createSlice({
     },
     addStep: state => {
       ++state.step
-    } 
+    },
+    resetSteps: state => {
+      state.step = 0
+    },
   }
 })
 
@@ -58,8 +54,7 @@ export const gameSlice = createSlice({
  */
 export const {
   addStep,
-  gameOver,
-  setGameOver,
+  resetSteps,
   setWinnerSquares,
   setGameStatus,
 } = gameSlice.actions
@@ -67,8 +62,6 @@ export const {
 /**
  * Getters
  */
-export const getIsGameOver = (state: RootState) => state.game.is_game_over
-
 export const getWinnerSquares = (state: RootState) => state.game.winner_squares
 
 export const getGameStatus = (state: RootState) => state.game.status

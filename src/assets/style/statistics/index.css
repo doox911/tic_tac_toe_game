@@ -1,0 +1,10 @@
+.statistics {
+  max-width: 572px;
+  min-width: 572px;
+}
+
+.statistics-text--gradient {
+  background: -webkit-radial-gradient(#0284c7, #e11d48);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

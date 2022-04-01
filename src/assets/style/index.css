@@ -6,6 +6,7 @@
 
 @import 'square';
 @import 'board';
+@import 'statistics';
 
 .user-select-none {
   user-select: none;
