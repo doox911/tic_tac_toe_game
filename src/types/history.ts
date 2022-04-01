@@ -1,6 +1,6 @@
 import type { RenderSquare } from '../components/Square'
 
-export interface Winner {
+export interface WinnerObjectFromHistory {
   win: boolean,
   squares: (RenderSquare | null)[]
 }

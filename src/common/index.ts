@@ -8,7 +8,7 @@ import Config from '../config';
  */
 import type { RenderSquare } from '../components/Square'
 import type { GameHistory } from '../components/Game'
-import type { Winner } from '../types'
+import type { WinnerObjectFromHistory } from '../types'
 
 /**
  * Поиск победителя и выигрышной последовательности
@@ -17,7 +17,7 @@ import type { Winner } from '../types'
  * @param square Клетка по которой кликнули
  * @returns 
  */
-export function findWinner(board_condition: GameHistory, square: RenderSquare): Winner {
+export function findWinner(board_condition: GameHistory, square: RenderSquare): WinnerObjectFromHistory {
   const selected_square_value = board_condition[square.position.y][square.position.x]
 
   /**
@@ -118,7 +118,6 @@ export function generateSquares(): RenderSquare[] {
       squares.push({
         id: count++,
         value: null,
-        freeze: false,
         position: {
           x: j,
           y: i,
@@ -142,4 +141,26 @@ export function createGameHistory(): GameHistory {
   }
 
   return history
+}
+
+export function getLastStep() {
+  return Config.BOARD_SIZE * Config.BOARD_SIZE
+}
+
+export function secondsToHHMMSS(time: number): string {
+  let minutes: number | string = Math.floor(time / 60);
+
+  let seconds: string = `${time - minutes * 60}`.padStart(2, '0');
+
+  let hours: string = `${Math.floor(time / 3600)}`.padStart(2, '0');
+
+  minutes = `${minutes}`.padStart(2, '0');
+
+  return hours + ':' + minutes + ':' + seconds;
+}
+
+export function getDiff(time: number): number {
+  const now = (new Date()).getTime()
+
+  return ~~((now - time) / 1000)
 }

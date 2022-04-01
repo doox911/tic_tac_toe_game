@@ -9,4 +9,4 @@ export default Object.freeze({
    * Длинна выгрышной последовательности
    */
    WINNER_LENGTH: 5
-}) 
+})
