@@ -6,7 +6,7 @@ import * as React from 'react'
 /**
  * Common
  */
-import { 
+import {
   findWinner,
   createGameHistory,
   generateSquares,
@@ -40,6 +40,11 @@ import {
   resetSteps,
   getStep,
 } from '../store/game'
+
+/**
+ * Socket
+ */
+import { io } from 'socket.io-client'
 
 /**
  * Types
@@ -77,6 +82,18 @@ function Game() {
   const step = useAppSelector(getStep)
 
   const dispatch = useAppDispatch();
+
+
+  /**
+   * Socket
+   */
+  const connect = () => {
+    const socket = io('http://localhost:9000')
+  };
+
+  React.useEffect(() => {
+    connect()
+  }, [])
 
   function updateTime() {
     setTime(secondsToHHMMSS(getDiff(start_time)))
